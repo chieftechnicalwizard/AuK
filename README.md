@@ -9,6 +9,7 @@
   <a href=https://arxiv.org/abs/2609.08936 target="_blank"><img src=https://img.shields.io/badge/Report-b5212f.svg?logo=arxiv height=22px></a>
   <a href=https://huggingface.co/spaces/tencent/AuK target="_blank"><img src=https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-Demo%20Space-ffbd45.svg height=22px></a>
   <a href=https://modelscope.cn/studios/Tencent-Hunyuan/AuK target="_blank"><img src=https://img.shields.io/badge/%F0%9F%A4%96%20ModelScope-Demo%20Space-624aff.svg height=22px></a>
+  <a href="https://www.shekinahshine.org/?donate=paypal" target="_blank"><img src="docs/badges/paypal-donate-pill.svg" alt="Donate via PayPal" height="22px"></a>
 </div>
 
 <div align="center">
@@ -681,7 +682,14 @@ If you find AuK useful in your research, please cite our work:
 
 Sponsorship and donations support Shekinah Shine maintenance, sanctuary groundskeeping, AI broadcast infrastructure, and open-source development.
 
-[PayPal Donate (Shekinah Shine)](https://www.paypal.com/donate/?business=DQWR2UNVNWPQU&no_recurring=0&item_name=SHEKINAH+SHINE+MAINTENANCE%2C+GARDEN%2C+AND+GROUNDSKEEPING&currency_code=USD) · [Cash App (`$chieftechnicalwizard`)](https://cash.app/$chieftechnicalwizard) · [Venmo (`@Christopher-CTW`)](https://venmo.com/u/Christopher-CTW) · [GitHub Sponsors](https://github.com/sponsors/chieftechnicalwizard) · [Shekinah Shine Website](https://www.shekinahshine.org/)
+<p>
+  <a href="https://www.shekinahshine.org/?donate=paypal"><img src="docs/badges/paypal-donate-pill.svg" alt="Donate via PayPal" height="24" align="absmiddle" /></a> &nbsp;·&nbsp;
+  <a href="https://www.shekinahshine.org/?donate=paypal"><img src="docs/badges/icon-paypal.svg" width="16" height="16" align="absmiddle" alt="" /> PayPal Donate (Shekinah Shine)</a> &nbsp;·&nbsp;
+  <a href="https://www.shekinahshine.org/?donate=cashapp"><img src="docs/badges/icon-cashapp.svg" width="16" height="16" align="absmiddle" alt="" /> Cash App</a> &nbsp;·&nbsp;
+  <a href="https://www.shekinahshine.org/?donate=venmo"><img src="docs/badges/icon-venmo.svg" width="16" height="16" align="absmiddle" alt="" /> Venmo</a> &nbsp;·&nbsp;
+  <a href="https://github.com/sponsors/chieftechnicalwizard"><img src="docs/badges/icon-github-sponsors.svg" width="16" height="16" align="absmiddle" alt="" /> GitHub Sponsors</a> &nbsp;·&nbsp;
+  <a href="https://www.shekinahshine.org/"><img src="docs/badges/icon-shekinah.svg" width="16" height="16" align="absmiddle" alt="" /> Shekinah Shine Website</a>
+</p>
 
 ## License
 
