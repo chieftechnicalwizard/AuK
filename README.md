@@ -677,6 +677,12 @@ If you find AuK useful in your research, please cite our work:
 ```
 
 
+## Sponsors & Donations
+
+Sponsorship and donations support Shekinah Shine maintenance, sanctuary groundskeeping, AI broadcast infrastructure, and open-source development.
+
+[PayPal Donate (Shekinah Shine)](https://www.paypal.com/donate/?business=DQWR2UNVNWPQU&no_recurring=0&item_name=SHEKINAH+SHINE+MAINTENANCE%2C+GARDEN%2C+AND+GROUNDSKEEPING&currency_code=USD) · [Cash App (`$chieftechnicalwizard`)](https://cash.app/$chieftechnicalwizard) · [Venmo (`@Christopher-CTW`)](https://venmo.com/u/Christopher-CTW) · [GitHub Sponsors](https://github.com/sponsors/chieftechnicalwizard) · [Shekinah Shine Website](https://www.shekinahshine.org/)
+
 ## License
 
 AuK is released under the **MIT License**. See [`LICENSE`](LICENSE) for the full terms.
