@@ -21,6 +21,51 @@
 💻 Try our model on the <a href="https://huggingface.co/spaces/tencent/AuK">HuggingFace Space</a> · <a href="https://modelscope.cn/studios/Tencent-Hunyuan/AuK">ModelScope Space</a>!
 </p>
 
+## ChiefTechnicalWizard Fork Enhancements, Blackwell Optimizations & Resident API Usage
+
+This fork tracks upstream `Tencent-Hunyuan/AuK` and adds memory/I/O optimizations for **NVIDIA Blackwell (`sm_120` / `sm_121`)** GPUs under **PyTorch 2.12–2.15+cu130**, along with a resident FastAPI microservice (`src/auk/infer/auk_server.py`) for low-latency (`~3.2s`) surgical speech healing in long-form audiobook pipelines.
+
+| Enhancement | File Modified / Added | Engineering Reason & Impact |
+| :--- | :--- | :--- |
+| **1. `Qwen2.5-Omni-3B` Unused `lm_head` Pruning (`-593.5 MB` BF16 VRAM)** | `src/auk/infer/infer_auk.py` | **Why:** During `AukInfer` initialization, the `Qwen2.5-Omni-3B` thinker is used exclusively as a hidden-state feature extractor (`outputs.hidden_states[-1]`) conditioning the `1.5B CFMEdit` Diffusion Transformer; token logits are never decoded. Replacing `thinker.lm_head` with `nn.Identity()` immediately frees **593.5 MB** of resident BF16 GPU memory alongside upstream's visual-tower removal, with bit-identical audio output. |
+| **2. Direct `soundfile` Audio I/O Fast-Path (`_load_audio`, `get_gen_duration`, `save_audio`)** | `src/auk/infer/infer_auk.py` | **Why:** In `torchaudio >= 2.9` (PyTorch `2.12+cu130` / `2.15+cu130` on AArch64 and x86_64 Blackwell), `torchaudio.load()`, `torchaudio.info()`, and `torchaudio.save()` route through `TorchCodec` and raise `ImportError` when FFmpeg shared libraries are absent. Routing audio read/info/write through `soundfile` (`sf.read`, `sf.info`, `sf.write`) first eliminates `TorchCodec` failures and C++ dispatcher overhead while retaining `torchaudio` as a fallback. |
+| **3. Resident FastAPI Surgical Speech Repair & Directing Daemon (`:3950`)** | `src/auk/infer/auk_server.py` | **Why:** Loading `Qwen2.5-Omni-3B` + `BigVGANFlowVAE` + `1.5B CFMEdit` takes ~8–12 seconds per CLI invocation. `auk_server.py` keeps the full pipeline warm in GPU memory (`cpu_offload=False`) with `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`, serving surgical audio edits over HTTP in **~3.2 seconds** per 3–5s thought chunk.<br>• **Content Surgery (`preserve_duration=False`)**: Scales target duration via `get_gen_duration()` for word/phoneme replacements (`"Replace 'X' with 'Y'."`), insertions (`"Add 'X' after 'Y'."`), and stutter deletion.<br>• **Same-Length Acoustic & Paralinguistic Directing (`preserve_duration=True`)**: Omits `gen_seconds` per `docs/COOKBOOK.md` (Sections 3.1, 4.1, 4.5, 5.1) so pitch shifts (`"Raise the pitch by 2 semitones."`), emotion edits, whisper conversion, and muffling restoration preserve the exact source duration frame-for-frame. |
+
+### Running the Resident HTTP Service (`:3950`)
+
+```bash
+export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
+export PYTHONPATH="$(pwd)/src"
+export AUK_CKPT_PATH="ckpts/AuK/auk_base.safetensors"
+export AUK_CONFIG_PATH="ckpts/AuK/config.yaml"
+export AUK_QWEN_PATH="/path/to/Qwen2.5-Omni-3B"   # optional local override
+export PORT=3950
+
+python3 src/auk/infer/auk_server.py
+```
+
+#### Example 1: In-Place Pronunciation / Dropped-Word Surgery (`preserve_duration=false`)
+
+```bash
+curl -X POST http://127.0.0.1:3950/repair \
+  -F "file=@chunk.wav" \
+  -F "target_text=Admiral Thrawn studied the Chimaera tactical display." \
+  -F "asr_text=Admiral Thrawn studied the Chimera tactical display." \
+  -F "instruction=Replace 'Chimera' with 'Kie-mair-uh'." \
+  -F "nfe=32" -F "cfg=2.0" --output healed_chunk.wav
+```
+
+#### Example 2: Same-Length Pitch / Timbre Restoration (`preserve_duration=true`)
+
+```bash
+curl -X POST http://127.0.0.1:3950/repair \
+  -F "file=@low_pitch_quote.wav" \
+  -F "instruction=Raise the pitch by 2 semitones." \
+  -F "preserve_duration=true" \
+  -F "nfe=32" -F "cfg=2.0" --output pitch_healed.wav
+```
+
+
 ## News
 
 - **[2026/10/14]** 🚀 The **distillation training pipeline** is released! Train your own **AuK-Flash** — see [PR #22](https://github.com/Tencent-Hunyuan/AuK/pull/22).

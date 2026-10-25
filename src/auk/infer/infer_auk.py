@@ -72,6 +72,11 @@ class AukInfer:
         if thinker.visual is not None:
             del thinker.visual
             thinker.visual = None
+        # Drop unused language modeling head (593.5 MB in BF16) - only hidden states are used by CFMEdit
+        if hasattr(thinker, 'lm_head') and thinker.lm_head is not None:
+            import torch.nn as nn
+            del thinker.lm_head
+            thinker.lm_head = nn.Identity()
         text_encoder = thinker
         text_processor = Qwen2_5OmniProcessor.from_pretrained(text_encoder_config.text_encoder_path)
 
@@ -161,7 +166,16 @@ class AukInfer:
 
     def _load_audio(self, source: str | tuple[torch.Tensor, int]) -> tuple[torch.Tensor, float]:
         if isinstance(source, str):
-            audio, sr = torchaudio.load(source)
+            try:
+                import soundfile as sf
+                data, sr = sf.read(source, dtype='float32')
+                audio = torch.from_numpy(data)
+                if audio.ndim == 1:
+                    audio = audio.unsqueeze(0)
+                else:
+                    audio = audio.t()
+            except Exception:
+                audio, sr = torchaudio.load(source)
         else:
             audio, sr = source
             audio = audio.detach().to(device="cpu", dtype=torch.float32)
@@ -349,8 +363,13 @@ def get_gen_duration(
 
     ref_seconds = None
     if audio:
-        info = torchaudio.info(audio)
-        ref_seconds = info.num_frames / info.sample_rate
+        try:
+            import soundfile as sf
+            info = sf.info(audio)
+            ref_seconds = float(info.duration)
+        except Exception:
+            info = torchaudio.info(audio)
+            ref_seconds = info.num_frames / info.sample_rate
 
     if ref_text and gen_text and ref_seconds is not None:
         return ref_seconds * len(gen_text.encode("utf-8")) / max(1, len(ref_text.encode("utf-8"))) / speed
@@ -363,4 +382,9 @@ def save_audio(audio: torch.Tensor, sample_rate: int, output_path: str):
         audio = audio.unsqueeze(0)
     out_dir = os.path.dirname(os.path.abspath(output_path))
     os.makedirs(out_dir, exist_ok=True)
-    torchaudio.save(output_path, audio.to(torch.float32), sample_rate)
+    try:
+        import soundfile as sf
+        data = audio.detach().cpu().to(torch.float32).t().numpy()
+        sf.write(output_path, data, sample_rate)
+    except Exception:
+        torchaudio.save(output_path, audio.to(torch.float32), sample_rate)
